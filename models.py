@@ -14,11 +14,19 @@ class gasto(models.Model):
     notas = fields.Text(string='Información Adicional')	
     _defaults = {
     'fecha': fields.Date.today(),
-    }	
+    'state': 'new'
+    }
 
-# Nombre del Responsable
+# Nombre del Responsable y Asocia Cierre de caja
     @api.one
     @api.depends('name')
     def _action_responsable(self):
-	self.responsable = str(self.env.user.name)
+        # Asigna el nombre del responsable
+        self.responsable = str(self.env.user.name)
+        # Asigna el cierre de caja
+        cierre_regular = self.env['cierre'].search([('state', '=', 'new'), ('tipo', '=', 'regular')])
+        if cierre_regular.id == False :
+            raise Warning ("Error: Proceda a crear un cierre de caja tipo Regular.")
+        else :
+            self.cierre_id = cierre_regular.id
 
